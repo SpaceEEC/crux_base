@@ -19,7 +19,7 @@ defmodule Crux.Base.Producer do
   def dispatch({_, nil, _nil}), do: nil
 
   def dispatch({type, data, shard_id}) do
-    with [{pid, _other}] <- Registry.lookup(@registry, shard_id),
+    with [{pid, _other}] <- Registry.lookup(@registry, {:producer, shard_id}),
          true <- Process.alive?(pid) do
       GenStage.cast(pid, {:dispatch, {type, data, shard_id}})
     else
