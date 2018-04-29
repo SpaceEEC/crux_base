@@ -25,7 +25,7 @@ defmodule Crux.Base.Producer do
     else
       _ ->
         require Logger
-        Logger.warn("Missing producer for shard #{shard_id}; #{type}")
+        Logger.warn("[Crux][Base][Producer]: Missing producer for shard #{shard_id}; #{type}")
     end
   end
 
