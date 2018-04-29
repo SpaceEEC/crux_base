@@ -1,7 +1,7 @@
 defmodule Crux.Base.ConsumerSupervisor do
   use ConsumerSupervisor
 
-  def start_link([mod]=args) when is_atom(mod) do
+  def start_link([mod] = args) when is_atom(mod) do
     ConsumerSupervisor.start_link(__MODULE__, args, name: __MODULE__)
   end
 
