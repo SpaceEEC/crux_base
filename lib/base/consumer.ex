@@ -21,18 +21,18 @@ defmodule Crux.Base.Consumer do
 
   @doc false
   def init(target) do
-    {:producer_consumer, nil, dispatcher: GenStage.BroadcastDispatcher, subscribe_to: [target]}
+    {:consumer, nil, subscribe_to: [target]}
   end
 
   @doc false
-  def handle_events(events, _from, state) do
-    events =
-      for {type, data, shard_id} <- events do
-        {type, handle_event(type, data, shard_id), shard_id}
-      end
-      |> Enum.filter(&elem(&1, 1))
+  def handle_events(events, _from, nil) do
+    for {type, data, shard_id} <- events,
+        value <- [handle_event(type, data, shard_id)],
+        value != nil do
+      Crux.Base.Producer.dispatch({type, value, shard_id})
+    end
 
-    {:noreply, events, state}
+    {:noreply, [], nil}
   end
 
   # https://discordapp.com/developers/docs/topics/gateway#ready-ready-event-fields
@@ -58,7 +58,9 @@ defmodule Crux.Base.Consumer do
   defp handle_event(:RESUMED, data, _shard_id), do: data
   # https://discordapp.com/developers/docs/topics/gateway#channel-create
   defp handle_event(:CHANNEL_CREATE, data, _shard_id) do
-    channel = Cache.channel_cache().update(data)
+    channel =
+      Cache.channel_cache().update(data)
+      |> Strcuts.create(Channel)
 
     with %{guild_id: guild_id} when is_integer(guild_id) <- channel,
          do: Cache.guild_cache().insert(channel)
@@ -68,26 +70,20 @@ defmodule Crux.Base.Consumer do
 
   # https://discordapp.com/developers/docs/topics/gateway#channel-update
   defp handle_event(:CHANNEL_UPDATE, data, _shard_id) do
-    old = with {:ok, channel} <- Cache.channel_cache().fetch(data.id) do
-      channel
-    else
-      _ ->
-        nil
-    end
+    old =
+      with {:ok, channel} <- Cache.channel_cache().fetch(data.id) do
+        channel
+      else
+        _ ->
+          nil
+      end
 
     {old, Cache.channel_cache().update(data)}
   end
 
   # https://discordapp.com/developers/docs/topics/gateway#channel-delete
   defp handle_event(:CHANNEL_DELETE, data, _shard_id) do
-    channel =
-      with {:ok, channel} <- Cache.channel_cache().fetch(data.id) do
-        channel
-      else
-        _ ->
-          Structs.create(data, Channel)
-      end
-
+    channel = Structs.create(data, Channel)
     Cache.channel_cache().delete(data.id)
 
     with %{guild_id: guild_id} when is_integer(guild_id) <- data,
@@ -206,7 +202,7 @@ defmodule Crux.Base.Consumer do
       with {:ok, %{emojis: emojis}} <- Cache.guild_cache().fetch(data.guild_id) do
         emojis
       else
-        _->
+        _ ->
           nil
       end
 
@@ -271,7 +267,7 @@ defmodule Crux.Base.Consumer do
 
       role
     else
-      _->
+      _ ->
         nil
     end
   end
