@@ -60,7 +60,7 @@ defmodule Crux.Base.Consumer do
   defp handle_event(:CHANNEL_CREATE, data, _shard_id) do
     channel =
       Cache.channel_cache().update(data)
-      |> Strcuts.create(Channel)
+      |> Structs.create(Channel)
 
     with %{guild_id: guild_id} when is_integer(guild_id) <- channel,
          do: Cache.guild_cache().insert(channel)
