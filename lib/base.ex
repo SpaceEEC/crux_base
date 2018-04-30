@@ -1,10 +1,13 @@
-defmodule Crux.Base.Application do
+defmodule Crux.Base do
   @moduledoc """
     Crux "Base" module providing an example implementation of `Crux.Gateway`, `Crux.Rest`, and `Crux.Cache` while using `Crux.Structs`.
 
     You can set as environment for `:crux_base` a `token`.
     If the token is provided it will be forwarded to both `Crux.Gateway` and `Crux.Rest`.
     Also this will fetch and put the gateway `:url` and recommended `:shard_count` if not already specified.
+
+    For task based cosuming you can use the provided `Crux.Base.TaskConsumer` and `Crux.Base.ConsumerSupervisor` modules.
+    You are also free to roll your own consumer / producer consumer setup by subscribing to the producers fetchable via `Crux.Base.producers/0`.
   """
 
   use Application
@@ -13,6 +16,7 @@ defmodule Crux.Base.Application do
 
   @registry Crux.Base.Registry
 
+  @doc false
   def start(_type, _args) do
     Application.put_env(:crux_gateway, :dispatcher, GenStage.BroadcastDispatcher)
     Application.put_env(:crux_base, :dispatcher, GenStage.BroadcastDispatcher)
@@ -56,6 +60,13 @@ defmodule Crux.Base.Application do
     Supervisor.start_link(children, strategy: :one_for_one, name: Crux.Base.Supervisor)
   end
 
+  @doc """
+    Computes a map of all producers keyed by shard_id.
+
+    Values are either a `pid/0` or, if for some reason the producer could not be found, `:not_found`.
+    Similar to `Crux.Gateway.Connection.Producer.producers/0`, but they are emitting `Crux.Base.Consumer.event()`s instead of raw discord api payloads.
+  """
+  @spec producers() :: %{required(shard_id()) => pid() | :not_found}
   def producers() do
     Application.ensure_started(:crux_base)
 
@@ -73,4 +84,29 @@ defmodule Crux.Base.Application do
       {shard_id, pid}
     end)
   end
+
+  @typedoc """
+    A discord snowflake.
+  """
+  @type snowflake :: non_neg_integer()
+
+  @typedoc """
+    The id of a shard.
+  """
+  @type shard_id :: non_neg_integer()
+
+  @typedoc """
+    The id of a message.
+  """
+  @type message_id :: snowflake()
+
+  @typedoc """
+    The id of a guild.
+  """
+  @type guild_id :: snowflake()
+
+  @typedoc """
+    The id of a channel.
+  """
+  @type channel_id :: snowflake()
 end

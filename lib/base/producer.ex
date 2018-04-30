@@ -1,8 +1,5 @@
 defmodule Crux.Base.Producer do
-  @moduledoc """
-    Handles dispatching of packets received from the gateway producers
-    after they were consumed and processed by `Crux.Base.Consumer`.
-  """
+  @moduledoc false
 
   use GenStage
 

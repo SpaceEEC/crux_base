@@ -1,10 +1,31 @@
 defmodule Crux.Base.TaskConsumer do
+  @moduledoc """
+    Provides a `__using__` macro to inject to simplify consuming of gateway events.
+
+    A somewhat example of this:
+
+    A Supervisor, like `Crux.Base.ConsumerSupervisor`, and
+    ```ex
+  defmodule Bot.Consumer do
+    use Crux.Base.TaskConsumer
+
+    def handle_event({:MESSAGE_CREATE, message, _shard_id}) do
+      IO.inspect(message)
+    end
+
+    def handle_event(_event), do: nil
+  end
+    ```
+  """
+
   defmacro __using__(_opts) do
     quote location: :keep do
-      def handle_event(_type, _data, _shard_id), do: nil
+      @behaviour Crux.Base.TaskConsumer
 
-      def start_link({type, data, shard_id}) do
-        Task.start_link(fn -> handle_event(type, data, shard_id) end)
+      def handle_event(_event), do: nil
+
+      def start_link(event) do
+        Task.start_link(fn -> handle_event(event) end)
       end
 
       def child_spec(_args) do
@@ -15,7 +36,19 @@ defmodule Crux.Base.TaskConsumer do
         }
       end
 
-      defoverridable handle_event: 3, child_spec: 1
+      defoverridable handle_event: 1, child_spec: 1, start_link: 1
     end
   end
+
+  @typedoc """
+    All available element types.
+  """
+  @type event :: Crux.Base.Consumer.event()
+
+  @doc """
+    Will handle events.
+
+    Be sure to have one "catch all" clause to not crash your consumer when you receive an event you didn't handle.
+  """
+  @callback handle_event(event :: event()) :: any()
 end

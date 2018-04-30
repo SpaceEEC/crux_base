@@ -42,7 +42,7 @@ defmodule Crux.Base.MixProject do
       {:crux_cache, "~> 0.1.0"},
       {:crux_gateway, "~> 0.1.0"},
       {:crux_rest, "~> 0.1.0"},
-      {:ex_doc, "~> 0.18.3", only: :dev}
+      {:ex_doc, git: "https://github.com/spaceeec/ex_doc", only: :dev}
     ]
   end
 end
