@@ -1,6 +1,6 @@
 defmodule Crux.Base.TaskConsumer do
   @moduledoc """
-    Provides a `__using__` macro to inject to simplify consuming of gateway events.
+    Provides a `__using__` macro to inject two functions to simplify consuming of gateway events.
 
     A somewhat example of this:
 
@@ -22,8 +22,6 @@ defmodule Crux.Base.TaskConsumer do
     quote location: :keep do
       @behaviour Crux.Base.TaskConsumer
 
-      def handle_event(_event), do: nil
-
       def start_link(event) do
         Task.start_link(fn -> handle_event(event) end)
       end
@@ -36,7 +34,7 @@ defmodule Crux.Base.TaskConsumer do
         }
       end
 
-      defoverridable handle_event: 1, child_spec: 1, start_link: 1
+      defoverridable child_spec: 1, start_link: 1
     end
   end
 
