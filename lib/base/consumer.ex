@@ -173,7 +173,7 @@ defmodule Crux.Base.Consumer do
     Cache.channel_cache().delete(data.id)
 
     with %{guild_id: guild_id} when is_integer(guild_id) <- data,
-         do: Cache.guild_cache().delete(channel)
+         do: Cache.guild_cache().delete(guild_id, channel)
 
     channel
   end
@@ -488,7 +488,7 @@ defmodule Crux.Base.Consumer do
 
   defp handle_event(:GUILD_ROLE_DELETE, %{role_id: role_id, guild_id: guild_id}, _shard_id) do
     with {:ok, %{roles: %{^role_id => role}}} <- Cache.guild_cache().fetch(guild_id) do
-      Cache.guild_cache().delete(guild_id, {:role, role_id})
+      Cache.guild_cache().delete(guild_id, role)
 
       role
     else
