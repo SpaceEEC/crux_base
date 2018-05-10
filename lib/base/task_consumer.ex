@@ -5,7 +5,7 @@ defmodule Crux.Base.TaskConsumer do
     A somewhat example of this:
 
     A Supervisor, like `Crux.Base.ConsumerSupervisor`, and
-    ```ex
+    ```elixir
   defmodule Bot.Consumer do
     use Crux.Base.TaskConsumer
 

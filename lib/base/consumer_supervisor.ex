@@ -3,7 +3,7 @@ defmodule Crux.Base.ConsumerSupervisor do
     Supervises a consumer, for example, a module using `Crux.Base.TaskConsumer`.
     
     A somewhat example of this:
-    ```ex
+    ```elixir
   defmodule Bot.Supervisor do
     def start_link(_), do: Supervisor.start_link(__MODULE__, %{}, name: __MODULE__)
 
