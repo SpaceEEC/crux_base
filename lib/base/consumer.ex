@@ -286,17 +286,20 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a user is banned from a guild.
 
+    A member is emitted when it was cached, a user if not.
+
     For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-ban-add).
   """
-  @type guild_ban_add_event :: {:GUILD_BAN_ADD, {User.t(), Guild.t()}, Crux.Base.shard_id()}
+  @type guild_ban_add_event ::
+          {:GUILD_BAN_ADD, {User.t() | Member.t(), Guild.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_BAN_ADD, data, _shard_id) do
+  defp handle_event(:GUILD_BAN_ADD, %{user: %{id: id}} = data, _shard_id) do
     case Cache.guild_cache().fetch(data.guild_id) do
-      {:ok, guild} ->
-        user = Structs.create(data.user, User)
-        Cache.guild_cache().delete(data.guild_id, user)
+      {:ok, %{members: %{^id => member}} = guild} ->
+        {member, guild}
 
-        {user, guild}
+      {:ok, guild} ->
+        {Structs.create(data.user, User), guild}
 
       _ ->
         nil
@@ -381,18 +384,23 @@ defmodule Crux.Base.Consumer do
     Emitted whenever a user leaves a guild.
     This includes kicks and bans (only if the user is present in the guild)
 
+    A member is emitted when it was cached, a user if not.
+
     For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-remove).
   """
   @type guild_member_remove_event ::
-          {:GUILD_MEMBER_REMOVE, {Guild.t(), User.t()}, Crux.Base.shard_id()}
+          {:GUILD_MEMBER_REMOVE, {User.t() | Member.t(), Guild.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_MEMBER_REMOVE, data, _shard_id) do
+  defp handle_event(:GUILD_MEMBER_REMOVE, %{user: %{id: id}} = data, _shard_id) do
     case Cache.guild_cache().fetch(data.guild_id) do
+      {:ok, %{members: %{^id => member}} = guild} ->
+        Cache.guild_cache().delete(guild.id, member)
+        {member, guild}
+
       {:ok, guild} ->
         user = Structs.create(data.user, User)
-        Cache.guild_cache().delete(guild.id, user)
 
-        {guild, user}
+        {user, guild}
 
       _ ->
         nil
