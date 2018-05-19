@@ -16,7 +16,7 @@ defmodule Crux.Base.Consumer do
 
   @doc false
   def start_link({shard_id, target}) do
-    name = {:via, Registry, {@registry, shard_id}}
+    name = {:via, Registry, {@registry, {:consumer, shard_id}}}
     GenStage.start_link(__MODULE__, target, name: name)
   end
 
