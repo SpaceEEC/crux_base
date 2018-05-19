@@ -23,7 +23,7 @@ defmodule Crux.Base.TaskConsumer do
       @behaviour Crux.Base.TaskConsumer
 
       def start_link(event) do
-        Task.start_link(fn -> handle_event(event) end)
+        Task.start_link(__MODULE__, :handle_event, [event])
       end
 
       def child_spec(_args) do
