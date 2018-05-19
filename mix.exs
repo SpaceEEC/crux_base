@@ -31,7 +31,7 @@ defmodule Crux.Base.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {Crux.Base.Application, []}
+      mod: {Crux.Base, []}
     ]
   end
 
