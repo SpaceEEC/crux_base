@@ -328,7 +328,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a guild's emojis updated.
 
-    The first element is a list of the emojis before the update.  
+    The first element is a list of the emojis before the update.
     The second element is al ist of the emojis after the update.
 
     For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-emojis-update).
@@ -411,7 +411,7 @@ defmodule Crux.Base.Consumer do
     Emitted whenever a guild member is updated.
 
     The first element is the member before the update or nil if uncached previously.
-    The second element is the member after the update. 
+    The second element is the member after the update.
 
     For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-update).
   """
@@ -564,7 +564,7 @@ defmodule Crux.Base.Consumer do
 
   @typedoc """
     Emitted whenever a bulk of messages is deleted.
-    
+
     For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk).
   """
   @type message_delete_bulk_event ::
@@ -771,6 +771,9 @@ defmodule Crux.Base.Consumer do
         nil
     end
   end
+
+  # User account only thing, for some reason bots do receive it, although empty, sometimes as well.
+  defp handle_event(:PRESENCES_REPLACE, [], _shard_id), do: nil
 
   defp handle_event(type, data, shard_id) do
     require Logger
