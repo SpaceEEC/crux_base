@@ -474,7 +474,7 @@ defmodule Crux.Base.Consumer do
   @type guild_role_update_event ::
           {:GUILD_ROLE_UPDATE, {Role.t() | nil, Role.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_ROLE_UPDATE, %{id: id, guild_id: guild_id} = data, shard_id) do
+  defp handle_event(:GUILD_ROLE_UPDATE, %{guild_id: guild_id, role: %{id: id}} = data, shard_id) do
     old_role =
       case Cache.guild_cache().fetch(guild_id) do
         {:ok, %{roles: %{^id => role}}} ->
