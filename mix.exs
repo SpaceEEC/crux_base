@@ -1,28 +1,33 @@
 defmodule Crux.Base.MixProject do
   use Mix.Project
 
+  @vsn "0.1.0"
+  @name :crux_base
+
   def project do
     [
       start_permanent: Mix.env() == :prod,
       package: package(),
-      app: :crux_base,
-      version: "0.1.0",
+      app: @name,
+      version: @vsn,
       elixir: "~> 1.6",
-      description: "An example / base implemention of various crux components.",
-      source_url: "https://github.com/SpaceEEC/crux_base/",
-      homepage_url: "https://github.com/SpaceEEC/crux_base/",
+      description: "An example / base implemention of crux' components.",
+      source_url: "https://github.com/SpaceEEC/#{@name}/",
+      homepage_url: "https://github.com/SpaceEEC/#{@name}/",
       deps: deps()
     ]
   end
 
   def package do
     [
-      name: :crux_base,
+      name: @name,
       licenses: ["MIT"],
       maintainers: ["SpaceEEC"],
       links: %{
-        "GitHub" => "https://github.com/SpaceEEC/crux_base/",
-        "Docs" => "https://hexdocs.pm/crux_base/"
+        "GitHub" => "https://github.com/SpaceEEC/#{@name}/",
+        "Changelog" => "https://github.com/SpaceEEC/#{@name}/releases/tag/#{@vsn}/",
+        "Documentation" => "https://hexdocs.pm/#{@name}/",
+        "Unified Development Documentation" => "https://crux.randomly.space/"
       }
     ]
   end
