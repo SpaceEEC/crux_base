@@ -94,7 +94,7 @@ defmodule Crux.Base.Consumer do
            }, Crux.Base.shard_id()}
 
   @doc false
-  defp handle_event(:READY, data, _shard_id) do
+  def handle_event(:READY, data, _shard_id) do
     Map.update!(
       data,
       :guilds,
@@ -118,7 +118,7 @@ defmodule Crux.Base.Consumer do
   """
   @type resumed_event :: {:RESUMED, %{_trace: [String.t()]}, Crux.Base.shard_id()}
 
-  defp handle_event(:RESUMED, data, _shard_id), do: data
+  def handle_event(:RESUMED, data, _shard_id), do: data
 
   @typedoc """
     Emitted whenever a channel is created.
@@ -127,7 +127,7 @@ defmodule Crux.Base.Consumer do
   """
   @type channel_create_event :: {:CHANNEL_CREATE, Channel.t(), Crux.Base.shard_id()}
 
-  defp handle_event(:CHANNEL_CREATE, data, _shard_id) do
+  def handle_event(:CHANNEL_CREATE, data, _shard_id) do
     channel =
       Cache.channel_cache().update(data)
       |> Structs.create(Channel)
@@ -149,7 +149,7 @@ defmodule Crux.Base.Consumer do
   @type channel_update_event ::
           {:CHANNEL_UPDATE, {Channel.t() | nil, Channel.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:CHANNEL_UPDATE, data, _shard_id) do
+  def handle_event(:CHANNEL_UPDATE, data, _shard_id) do
     old =
       with {:ok, channel} <- Cache.channel_cache().fetch(data.id) do
         channel
@@ -168,7 +168,7 @@ defmodule Crux.Base.Consumer do
   """
   @type channel_delete_event :: {:CHANNEL_DELETE, Channel.t(), Crux.Base.shard_id()}
 
-  defp handle_event(:CHANNEL_DELETE, data, _shard_id) do
+  def handle_event(:CHANNEL_DELETE, data, _shard_id) do
     channel = Structs.create(data, Channel)
     Cache.channel_cache().delete(data.id)
 
@@ -186,7 +186,7 @@ defmodule Crux.Base.Consumer do
   @type channel_pins_update_event ::
           {:CHANNEL_PINS_UPDATE, {Channel.t(), String.t() | nil}, Crux.Base.shard_id()}
 
-  defp handle_event(:CHANNEL_PINS_UPDATE, data, _shard_id) do
+  def handle_event(:CHANNEL_PINS_UPDATE, data, _shard_id) do
     case Cache.channel_cache().fetch(data.channel_id) do
       {:ok, channel} ->
         {channel, Map.get(data, :last_pin_timestamp)}
@@ -213,7 +213,7 @@ defmodule Crux.Base.Consumer do
   """
   @type guild_update_event :: {:GUILD_UPDATE, {Guild.t() | nil, Guild.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(guild_event, data, _shard_id)
+  def handle_event(guild_event, data, _shard_id)
        when guild_event in [:GUILD_CREATE, :GUILD_UPDATE] do
     guild = Structs.create(data, Guild)
 
@@ -268,7 +268,7 @@ defmodule Crux.Base.Consumer do
   """
   @type guild_delete_event :: {:GUILD_DELETE, Guild.t(), Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_DELETE, data, shard_id) do
+  def handle_event(:GUILD_DELETE, data, shard_id) do
     guild =
       data
       |> Map.put(:shard_id, shard_id)
@@ -293,7 +293,7 @@ defmodule Crux.Base.Consumer do
   @type guild_ban_add_event ::
           {:GUILD_BAN_ADD, {User.t() | Member.t(), Guild.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_BAN_ADD, %{user: %{id: id}} = data, _shard_id) do
+  def handle_event(:GUILD_BAN_ADD, %{user: %{id: id}} = data, _shard_id) do
     case Cache.guild_cache().fetch(data.guild_id) do
       {:ok, %{members: %{^id => member}} = guild} ->
         {member, guild}
@@ -313,7 +313,7 @@ defmodule Crux.Base.Consumer do
   """
   @type guild_ban_remove_event :: {:GUILD_BAN_REMOVE, {User.t(), Guild.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_BAN_REMOVE, data, _shard_id) do
+  def handle_event(:GUILD_BAN_REMOVE, data, _shard_id) do
     case Cache.guild_cache().fetch(data.guild_id) do
       {:ok, guild} ->
         user = Structs.create(data.user, User)
@@ -336,7 +336,7 @@ defmodule Crux.Base.Consumer do
   @type guild_emojis_update_event ::
           {:GUILD_EMOJIS_UPDATE, {[Emoji.t()], [Emoji.t()]}, Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_EMOJIS_UPDATE, data, _shard_id) do
+  def handle_event(:GUILD_EMOJIS_UPDATE, data, _shard_id) do
     old_emojis =
       for {:ok, %{emojis: emojis}} <- [Cache.guild_cache().fetch(data.guild_id)],
           emoji_id <- emojis,
@@ -358,7 +358,7 @@ defmodule Crux.Base.Consumer do
   @type guild_integrations_update_event ::
           {:GUILD_INTEGRATIONS_UPDATE, Guild.t(), Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_INTEGRATIONS_UPDATE, data, _shard_id) do
+  def handle_event(:GUILD_INTEGRATIONS_UPDATE, data, _shard_id) do
     with {:ok, guild} <- Cache.guild_cache().fetch(data.guild_id) do
       guild
     else
@@ -374,7 +374,7 @@ defmodule Crux.Base.Consumer do
   """
   @type guild_member_add_event :: {:GUILD_MEMBER_ADD, Member.t(), Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_MEMBER_ADD, data, _shard_id) do
+  def handle_event(:GUILD_MEMBER_ADD, data, _shard_id) do
     member = Structs.create(data, Member)
 
     Cache.guild_cache().update(member)
@@ -391,7 +391,7 @@ defmodule Crux.Base.Consumer do
   @type guild_member_remove_event ::
           {:GUILD_MEMBER_REMOVE, {User.t() | Member.t(), Guild.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_MEMBER_REMOVE, %{user: %{id: id}} = data, _shard_id) do
+  def handle_event(:GUILD_MEMBER_REMOVE, %{user: %{id: id}} = data, _shard_id) do
     case Cache.guild_cache().fetch(data.guild_id) do
       {:ok, %{members: %{^id => member}} = guild} ->
         Cache.guild_cache().delete(guild.id, member)
@@ -418,7 +418,7 @@ defmodule Crux.Base.Consumer do
   @type guild_member_update_event ::
           {:GUILD_MEMBER_UPDATE, {Member.t() | nil, Member.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_MEMBER_UPDATE, data, _shard_id) do
+  def handle_event(:GUILD_MEMBER_UPDATE, data, _shard_id) do
     member = Structs.create(data, Member)
     %{user: id} = member
 
@@ -441,7 +441,7 @@ defmodule Crux.Base.Consumer do
   """
   @type guild_members_chunk_event :: {:GUILD_MEMBERS_CHUNK, [Member.t()], Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_MEMBERS_CHUNK, data, _shard_id) do
+  def handle_event(:GUILD_MEMBERS_CHUNK, data, _shard_id) do
     members = Structs.create(data.members, Member)
 
     Cache.guild_cache().update({data.guild_id, {:members, members}})
@@ -454,7 +454,7 @@ defmodule Crux.Base.Consumer do
   """
   @type guild_role_create_event :: {:GUILD_ROLE_CREATE, Role.t(), Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_ROLE_CREATE, data, _shard_id) do
+  def handle_event(:GUILD_ROLE_CREATE, data, _shard_id) do
     role =
       data.role
       |> Map.put(:guild_id, data.guild_id)
@@ -474,7 +474,7 @@ defmodule Crux.Base.Consumer do
   @type guild_role_update_event ::
           {:GUILD_ROLE_UPDATE, {Role.t() | nil, Role.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_ROLE_UPDATE, %{guild_id: guild_id, role: %{id: id}} = data, shard_id) do
+  def handle_event(:GUILD_ROLE_UPDATE, %{guild_id: guild_id, role: %{id: id}} = data, shard_id) do
     old_role =
       case Cache.guild_cache().fetch(guild_id) do
         {:ok, %{roles: %{^id => role}}} ->
@@ -494,7 +494,7 @@ defmodule Crux.Base.Consumer do
   """
   @type guild_role_delete_event :: {:GUILD_ROLE_DELETE, Role.t(), Crux.Base.shard_id()}
 
-  defp handle_event(:GUILD_ROLE_DELETE, %{role_id: role_id, guild_id: guild_id}, _shard_id) do
+  def handle_event(:GUILD_ROLE_DELETE, %{role_id: role_id, guild_id: guild_id}, _shard_id) do
     with {:ok, %{roles: %{^role_id => role}}} <- Cache.guild_cache().fetch(guild_id) do
       Cache.guild_cache().delete(guild_id, role)
 
@@ -512,7 +512,7 @@ defmodule Crux.Base.Consumer do
   """
   @type message_create_event :: {:MESSAGE_CREATE, Message.t(), Crux.Base.shard_id()}
 
-  defp handle_event(:MESSAGE_CREATE, data, _shard_id) do
+  def handle_event(:MESSAGE_CREATE, data, _shard_id) do
     unless Map.get(data, :webhook_id), do: Cache.user_cache().insert(data.author)
     Enum.each(data.mentions, &Cache.user_cache().insert/1)
 
@@ -531,7 +531,7 @@ defmodule Crux.Base.Consumer do
            | %{channel_id: Crux.Base.channel_id(), id: Crux.Base.message_id(), embeds: [term()]},
            Crux.Base.shard_id()}
 
-  defp handle_event(:MESSAGE_UPDATE, data, _shard_id) do
+  def handle_event(:MESSAGE_UPDATE, data, _shard_id) do
     case data do
       %{author: _author} ->
         Structs.create(data, Message)
@@ -552,7 +552,7 @@ defmodule Crux.Base.Consumer do
   @type message_delete_event ::
           {:MESSAGE_DELETE, {Crux.Base.message_id(), Channel.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:MESSAGE_DELETE, data, _shard_id) do
+  def handle_event(:MESSAGE_DELETE, data, _shard_id) do
     case Cache.channel_cache().fetch(data.channel_id) do
       :error ->
         nil
@@ -570,7 +570,7 @@ defmodule Crux.Base.Consumer do
   @type message_delete_bulk_event ::
           {:MESSAGE_DELETE_BULK, {[Crux.Base.message_id()], Channel.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:MESSAGE_DELETE_BULK, data, _shard_id) do
+  def handle_event(:MESSAGE_DELETE_BULK, data, _shard_id) do
     case Cache.channel_cache().fetch(data.channel_id) do
       :error ->
         nil
@@ -598,7 +598,7 @@ defmodule Crux.Base.Consumer do
           {:MESSAGE_REACTION_REMOVE, {User.t(), Channel.t(), Crux.Base.message_id(), Emoji.t()},
            Crux.Base.shard_id()}
 
-  defp handle_event(type, data, _shard_id)
+  def handle_event(type, data, _shard_id)
        when type in [:MESSAGE_REACTION_ADD, :MESSAGE_REACTION_REMOVE] do
     emoji =
       with id when not is_nil(id) <- data.emoji.id,
@@ -626,7 +626,7 @@ defmodule Crux.Base.Consumer do
   @type message_reaction_remove_all_event ::
           {:MESSAGE_REACTION_REMOVE_ALL, {Crux.Base.message_id(), Channel.t()}}
 
-  defp handle_event(:MESSAGE_REACTION_REMOVE_ALL, data, _shard_id) do
+  def handle_event(:MESSAGE_REACTION_REMOVE_ALL, data, _shard_id) do
     case Cache.channel_cache().fetch(data.channel_id) do
       {:ok, channel} ->
         {data.message_id, channel}
@@ -645,7 +645,7 @@ defmodule Crux.Base.Consumer do
           {:PRESENCE_UPDATE, {Presence.t() | nil, Presence.t()}, Crux.Base.shard_id()}
 
   # TODO: This also progates roles / username / etc changes. Would be nice to see the difference here in a sane manner.
-  defp handle_event(:PRESENCE_UPDATE, data, _shard_id) do
+  def handle_event(:PRESENCE_UPDATE, data, _shard_id) do
     old_presence =
       case Cache.presence_cache().fetch(data.user.id) do
         {:ok, presence} ->
@@ -681,7 +681,7 @@ defmodule Crux.Base.Consumer do
   @type typing_start_event ::
           {:TYPING_START, {Channel.t(), User.t(), String.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:TYPING_START, data, _shard_id) do
+  def handle_event(:TYPING_START, data, _shard_id) do
     with {:ok, channel} <- Cache.channel_cache().fetch(data.channel_id),
          {:ok, user} <- Cache.user_cache().fetch(data.user_id) do
       {channel, user, data.timestamp}
@@ -701,7 +701,7 @@ defmodule Crux.Base.Consumer do
   """
   @type user_update_event :: {:USER_UPDATE, {User.t() | nil, User.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:USER_UPDATE, data, _shard_id) do
+  def handle_event(:USER_UPDATE, data, _shard_id) do
     old_user =
       case Cache.user_cache().fetch(data.id) do
         {:ok, user} ->
@@ -725,7 +725,7 @@ defmodule Crux.Base.Consumer do
   @type voice_state_update_event ::
           {:VOICE_STATE_UPDATE, {VoiceState.t() | nil, VoiceState.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:VOICE_STATE_UPDATE, %{user_id: user_id} = data, _shard_id) do
+  def handle_event(:VOICE_STATE_UPDATE, %{user_id: user_id} = data, _shard_id) do
     voice_state = Structs.create(data, VoiceState)
 
     old_voice_state =
@@ -752,7 +752,7 @@ defmodule Crux.Base.Consumer do
            %{token: String.t(), guild_id: Crux.Base.guild_id(), endpoint: String.t()},
            Crux.Base.shard_id()}
 
-  defp handle_event(:VOICE_SERVER_UPDATE, data, _shard_id), do: data
+  def handle_event(:VOICE_SERVER_UPDATE, data, _shard_id), do: data
 
   @typedoc """
     Emitted whenever a channel's webhook is created, updtaed, or deleted.
@@ -762,7 +762,7 @@ defmodule Crux.Base.Consumer do
   @type webhooks_update_event ::
           {:WEBHOOKS_UPDATE, {Guild.t(), Channel.t()}, Crux.Base.shard_id()}
 
-  defp handle_event(:WEBHOOKS_UPDATE, data, _shard_id) do
+  def handle_event(:WEBHOOKS_UPDATE, data, _shard_id) do
     with {:ok, guild} <- Cache.guild_cache().fetch(data.guild_id),
          {:ok, channel} <- Cache.channel_cache().fetch(data.channel_id) do
       {guild, channel}
@@ -773,9 +773,9 @@ defmodule Crux.Base.Consumer do
   end
 
   # User account only thing, for some reason bots do receive it, although empty, sometimes as well.
-  defp handle_event(:PRESENCES_REPLACE, [], _shard_id), do: nil
+  def handle_event(:PRESENCES_REPLACE, [], _shard_id), do: nil
 
-  defp handle_event(type, data, shard_id) do
+  def handle_event(type, data, shard_id) do
     require Logger
 
     Logger.warn(
