@@ -66,14 +66,15 @@ defmodule Crux.Base do
     Values are either a `pid/0` or, if for some reason the producer could not be found, `:not_found`.
     Similar to `Crux.Gateway.Connection.Producer.producers/0`, but they are emitting `Crux.Base.Consumer.event()`s instead of raw discord api payloads.
   """
-  @spec producers() :: %{required(shard_id()) => pid() | :not_found}
+  @spec producers() :: %{required(Crux.Base.Consumer.shard_id()) => pid() | :not_found}
   def producers() do
     Application.ensure_started(:crux_base)
 
     Application.fetch_env!(:crux_gateway, :shards)
     |> Map.new(fn shard_id ->
       pid =
-        with [{pid, _other}] when is_pid(pid) <- Registry.lookup(@registry, {:producer, shard_id}),
+        with [{pid, _other}] when is_pid(pid) <-
+               Registry.lookup(@registry, {:producer, shard_id}),
              true <- Process.alive?(pid) do
           pid
         else
@@ -84,29 +85,4 @@ defmodule Crux.Base do
       {shard_id, pid}
     end)
   end
-
-  @typedoc """
-    A discord snowflake.
-  """
-  @type snowflake :: non_neg_integer()
-
-  @typedoc """
-    The id of a shard.
-  """
-  @type shard_id :: non_neg_integer()
-
-  @typedoc """
-    The id of a message.
-  """
-  @type message_id :: snowflake()
-
-  @typedoc """
-    The id of a guild.
-  """
-  @type guild_id :: snowflake()
-
-  @typedoc """
-    The id of a channel.
-  """
-  @type channel_id :: snowflake()
 end
