@@ -79,7 +79,7 @@ defmodule Crux.Base.Consumer do
     Emitted when a gateway connection completed the initial handshake with the gateway.
     The guilds are not yet sent!
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#ready).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#ready).
   """
   @type ready_event ::
           {:READY,
@@ -114,7 +114,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a gateway connection resumed after unexpectedly disconnecting.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#resumed).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#resumed).
   """
   @type resumed_event :: {:RESUMED, %{_trace: [String.t()]}, Crux.Base.shard_id()}
 
@@ -123,7 +123,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a channel is created.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-create).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-create).
   """
   @type channel_create_event :: {:CHANNEL_CREATE, Channel.t(), Crux.Base.shard_id()}
 
@@ -144,7 +144,7 @@ defmodule Crux.Base.Consumer do
     The first element is the channel before the update, or nil if not cached previously.
     The second element is the new channel.
 
-    For more infomrations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-update).
   """
   @type channel_update_event ::
           {:CHANNEL_UPDATE, {Channel.t() | nil, Channel.t()}, Crux.Base.shard_id()}
@@ -164,7 +164,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a channel is deleted.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-delete).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-delete).
   """
   @type channel_delete_event :: {:CHANNEL_DELETE, Channel.t(), Crux.Base.shard_id()}
 
@@ -181,7 +181,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a message is pinned or unpinned.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-pins-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-pins-update).
   """
   @type channel_pins_update_event ::
           {:CHANNEL_PINS_UPDATE, {Channel.t(), String.t() | nil}, Crux.Base.shard_id()}
@@ -199,7 +199,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever the client joins a guild.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-create).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-create).
   """
   @type guild_create_event :: {:GUILD_CREATE, Guild.t(), Crux.Base.shard_id()}
 
@@ -209,7 +209,7 @@ defmodule Crux.Base.Consumer do
     The first element is the guild before the update or nil if uncached previously.
     The second element is the guild after the update.
 
-    Fore more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-update).
+    Fore more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-update).
   """
   @type guild_update_event :: {:GUILD_UPDATE, {Guild.t() | nil, Guild.t()}, Crux.Base.shard_id()}
 
@@ -264,7 +264,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever the client leaves a guild.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-delete).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-delete).
   """
   @type guild_delete_event :: {:GUILD_DELETE, Guild.t(), Crux.Base.shard_id()}
 
@@ -288,7 +288,7 @@ defmodule Crux.Base.Consumer do
 
     A member is emitted when it was cached, a user if not.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-ban-add).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-ban-add).
   """
   @type guild_ban_add_event ::
           {:GUILD_BAN_ADD, {User.t() | Member.t(), Guild.t()}, Crux.Base.shard_id()}
@@ -309,7 +309,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
   Emitted whenever a user is unbanned from a guild.
 
-  For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-ban-removed).
+  For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-ban-removed).
   """
   @type guild_ban_remove_event :: {:GUILD_BAN_REMOVE, {User.t(), Guild.t()}, Crux.Base.shard_id()}
 
@@ -331,7 +331,7 @@ defmodule Crux.Base.Consumer do
     The first element is a list of the emojis before the update.
     The second element is al ist of the emojis after the update.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-emojis-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-emojis-update).
   """
   @type guild_emojis_update_event ::
           {:GUILD_EMOJIS_UPDATE, {[Emoji.t()], [Emoji.t()]}, Crux.Base.shard_id()}
@@ -353,7 +353,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever one of a guild's integration is updated.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-integrations-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-integrations-update).
   """
   @type guild_integrations_update_event ::
           {:GUILD_INTEGRATIONS_UPDATE, Guild.t(), Crux.Base.shard_id()}
@@ -370,7 +370,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a user joins a guild.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-add).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-add).
   """
   @type guild_member_add_event :: {:GUILD_MEMBER_ADD, Member.t(), Crux.Base.shard_id()}
 
@@ -386,7 +386,7 @@ defmodule Crux.Base.Consumer do
 
     A member is emitted when it was cached, a user if not.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-remove).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-remove).
   """
   @type guild_member_remove_event ::
           {:GUILD_MEMBER_REMOVE, {User.t() | Member.t(), Guild.t()}, Crux.Base.shard_id()}
@@ -413,7 +413,7 @@ defmodule Crux.Base.Consumer do
     The first element is the member before the update or nil if uncached previously.
     The second element is the member after the update.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-update).
   """
   @type guild_member_update_event ::
           {:GUILD_MEMBER_UPDATE, {Member.t() | nil, Member.t()}, Crux.Base.shard_id()}
@@ -437,7 +437,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a chunk of guild members is received.
 
-    For more informations see `Crux.Gateway.Command.request_guild_members/2` and [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-members-chunk).
+    For more information see `Crux.Gateway.Command.request_guild_members/2` and [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-members-chunk).
   """
   @type guild_members_chunk_event :: {:GUILD_MEMBERS_CHUNK, [Member.t()], Crux.Base.shard_id()}
 
@@ -450,7 +450,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a role is created.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-role-create).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-role-create).
   """
   @type guild_role_create_event :: {:GUILD_ROLE_CREATE, Role.t(), Crux.Base.shard_id()}
 
@@ -469,7 +469,7 @@ defmodule Crux.Base.Consumer do
     The first element is the role before the update or nil if previously cached.
     The second element is the role after the update.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-role-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-role-update).
   """
   @type guild_role_update_event ::
           {:GUILD_ROLE_UPDATE, {Role.t() | nil, Role.t()}, Crux.Base.shard_id()}
@@ -490,7 +490,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a role is deleted.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-role-delete).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-role-delete).
   """
   @type guild_role_delete_event :: {:GUILD_ROLE_DELETE, Role.t(), Crux.Base.shard_id()}
 
@@ -508,7 +508,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a message is created. (Sent to a channel)
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-create).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-create).
   """
   @type message_create_event :: {:MESSAGE_CREATE, Message.t(), Crux.Base.shard_id()}
 
@@ -523,7 +523,7 @@ defmodule Crux.Base.Consumer do
     Emitted whenever a message is updated.
     This can be an "embed update" (discord auto embedding stuff) or a full message update.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-update).
   """
   @type message_update_event ::
           {:MESSAGE_UPDATE,
@@ -547,7 +547,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a channel is deleted.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-delete).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-delete).
   """
   @type message_delete_event ::
           {:MESSAGE_DELETE, {Crux.Base.message_id(), Channel.t()}, Crux.Base.shard_id()}
@@ -565,7 +565,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a bulk of messages is deleted.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk).
   """
   @type message_delete_bulk_event ::
           {:MESSAGE_DELETE_BULK, {[Crux.Base.message_id()], Channel.t()}, Crux.Base.shard_id()}
@@ -583,7 +583,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a reaction is added to a message.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-reaction-add).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-reaction-add).
   """
   @type message_reaction_add_event ::
           {:MESSAGE_REACTION_ADD, {User.t(), Channel.t(), Crux.Base.message_id(), Emoji.t()},
@@ -592,7 +592,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a reaction is removed from a message.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove).
   """
   @type message_reaction_remove_event ::
           {:MESSAGE_REACTION_REMOVE, {User.t(), Channel.t(), Crux.Base.message_id(), Emoji.t()},
@@ -621,7 +621,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a user explicitly removes all reactions from a message.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove-all).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove-all).
   """
   @type message_reaction_remove_all_event ::
           {:MESSAGE_REACTION_REMOVE_ALL, {Crux.Base.message_id(), Channel.t()}}
@@ -639,7 +639,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a user's presence updates.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#presence-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#presence-update).
   """
   @type presence_update_event ::
           {:PRESENCE_UPDATE, {Presence.t() | nil, Presence.t()}, Crux.Base.shard_id()}
@@ -676,7 +676,7 @@ defmodule Crux.Base.Consumer do
 
     The third element is the timestamp of when the user started typing.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#typing-start).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#typing-start).
   """
   @type typing_start_event ::
           {:TYPING_START, {Channel.t(), User.t(), String.t()}, Crux.Base.shard_id()}
@@ -697,7 +697,7 @@ defmodule Crux.Base.Consumer do
     The first element is the user before the update or nil if previously cached.
     The second element is the user after the update.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#user-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#user-update).
   """
   @type user_update_event :: {:USER_UPDATE, {User.t() | nil, User.t()}, Crux.Base.shard_id()}
 
@@ -720,7 +720,7 @@ defmodule Crux.Base.Consumer do
     The first element is the voice state before the update or nil if previously cached.
     The second element is the voice state after the update.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#voice-state-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#voice-state-update).
   """
   @type voice_state_update_event ::
           {:VOICE_STATE_UPDATE, {VoiceState.t() | nil, VoiceState.t()}, Crux.Base.shard_id()}
@@ -745,7 +745,7 @@ defmodule Crux.Base.Consumer do
 
     > This is the raw, but atomified, payload from discord, you can directly forward it to lavalink etc.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#voice-server-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#voice-server-update).
   """
   @type voice_server_update_event ::
           {:VOICE_SERVER_UPDATE,
@@ -757,7 +757,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a channel's webhook is created, updtaed, or deleted.
 
-    For more informations see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#webhooks-update).
+    For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#webhooks-update).
   """
   @type webhooks_update_event ::
           {:WEBHOOKS_UPDATE, {Guild.t(), Channel.t()}, Crux.Base.shard_id()}
