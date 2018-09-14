@@ -185,10 +185,11 @@ defmodule Crux.Base.Consumer do
 
   def handle_event(:CHANNEL_UPDATE, data, _shard_id) do
     old =
-      with {:ok, channel} <- Cache.channel_cache().fetch(data.id) do
-        channel
-      else
-        _ ->
+      case Cache.channel_cache().fetch(data.id) do
+        {:ok, channel} ->
+          channel
+
+        :error ->
           nil
       end
 
@@ -227,7 +228,7 @@ defmodule Crux.Base.Consumer do
       {:ok, channel} ->
         {channel, Map.get(data, :last_pin_timestamp)}
 
-      _ ->
+      :error ->
         {channel_id, Map.get(data, :last_pin_timestamp)}
     end
   end
@@ -337,7 +338,7 @@ defmodule Crux.Base.Consumer do
       {:ok, guild} ->
         {Structs.create(user, User), guild}
 
-      _ ->
+      :error ->
         {Structs.create(user, User), guild_id}
     end
   end
@@ -357,7 +358,7 @@ defmodule Crux.Base.Consumer do
       {:ok, guild} ->
         {user, guild}
 
-      _ ->
+      :error ->
         {user, guild_id}
     end
   end
@@ -398,10 +399,11 @@ defmodule Crux.Base.Consumer do
           {:GUILD_INTEGRATIONS_UPDATE, Guild.t() | guild_id(), shard_id()}
 
   def handle_event(:GUILD_INTEGRATIONS_UPDATE, %{guild_id: guild_id}, _shard_id) do
-    with {:ok, guild} <- Cache.guild_cache().fetch(guild_id) do
-      guild
-    else
-      _ ->
+    case Cache.guild_cache().fetch(guild_id) do
+      {:ok, guild} ->
+        guild
+
+      :error ->
         guild_id
     end
   end
@@ -441,7 +443,7 @@ defmodule Crux.Base.Consumer do
       {:ok, guild} ->
         {Structs.create(user, User), guild}
 
-      _ ->
+      :error ->
         {Structs.create(user, User), guild_id}
     end
   end
@@ -465,7 +467,7 @@ defmodule Crux.Base.Consumer do
         {:ok, %{members: %{^id => old_member}}} ->
           old_member
 
-        _ ->
+        :error ->
           nil
       end
 
@@ -535,10 +537,11 @@ defmodule Crux.Base.Consumer do
           {:GUILD_ROLE_DELETE, Role.t() | {role_id(), Guild.t() | guild_id()}, shard_id()}
 
   def handle_event(:GUILD_ROLE_DELETE, %{role_id: role_id, guild_id: guild_id}, _shard_id) do
-    with {:ok, %{roles: %{^role_id => role}}} <- Cache.guild_cache().fetch(guild_id) do
-      Cache.guild_cache().delete(guild_id, role)
-      role
-    else
+    case Cache.guild_cache().fetch(guild_id) do
+      {:ok, %{roles: %{^role_id => role}}} ->
+        Cache.guild_cache().delete(guild_id, role)
+        role
+
       {:ok, guild} ->
         {role_id, guild}
 
@@ -611,11 +614,11 @@ defmodule Crux.Base.Consumer do
         _shard_id
       ) do
     case Cache.channel_cache().fetch(channel_id) do
-      :error ->
-        {message_id |> Util.id_to_int(), {channel_id, guild_id}}
-
       {:ok, channel} ->
         {message_id |> Util.id_to_int(), channel}
+
+      :error ->
+        {message_id |> Util.id_to_int(), {channel_id, guild_id}}
     end
   end
 
@@ -706,7 +709,7 @@ defmodule Crux.Base.Consumer do
       {:ok, channel} ->
         {message_id, channel}
 
-      _ ->
+      :error ->
         {message_id, channel_id}
     end
   end
@@ -726,7 +729,7 @@ defmodule Crux.Base.Consumer do
         {:ok, presence} ->
           presence
 
-        _ ->
+        :error ->
           nil
       end
 
@@ -797,7 +800,7 @@ defmodule Crux.Base.Consumer do
         {:ok, user} ->
           user
 
-        _ ->
+        :error ->
           nil
       end
 
