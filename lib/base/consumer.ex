@@ -112,7 +112,7 @@ defmodule Crux.Base.Consumer do
 
   @typedoc """
     Emitted when a gateway connection completed the initial handshake with the gateway.
-    The guilds are not yet sent!
+    The guilds are not yet sent, those are partial unavailable guilds!
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#ready).
   """
@@ -176,8 +176,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a channel was updated.
 
-    The first element is the channel before the update, or nil if not cached previously.
-    The second element is the new channel.
+    Emits nil if the channel was uncached previously.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-update).
   """
@@ -216,12 +215,15 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a message was pinned or unpinned.
 
-    The first element is the channel id if the channel was not cached.
+    Emits the channel id if the channel was uncached.
+
+    > The second element of the tuple is the timestamp of when the last pinned message was pinned.
+    > The timestamp will be the Unix Epoch if last pinned message was removed.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#channel-pins-update).
   """
   @type channel_pins_update_event ::
-          {:CHANNEL_PINS_UPDATE, {Channel.t() | channel_id(), String.t() | nil}, shard_id()}
+          {:CHANNEL_PINS_UPDATE, {Channel.t() | channel_id(), String.t()}, shard_id()}
 
   def handle_event(:CHANNEL_PINS_UPDATE, %{channel_id: channel_id} = data, _shard_id) do
     case Cache.channel_cache().fetch(channel_id) do
@@ -243,8 +245,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a guild updated.
 
-    The first element is the guild before the update or nil if uncached previously.
-    The second element is the guild after the update.
+    Emits nil as guild before the update if it was uncached previously.
 
     Fore more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-update).
   """
@@ -323,7 +324,8 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a user was banned from a guild.
 
-    Emits the user if the member was not cached.
+    Emits a user if the member was not cached.
+    Emits the guild id if the guild was not cached.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-ban-add).
   """
@@ -345,6 +347,8 @@ defmodule Crux.Base.Consumer do
 
   @typedoc """
   Emitted whenever a user was unbanned from a guild.
+
+  Emits the guild id if the guild was not cached.
 
   For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-ban-removed).
   """
@@ -391,7 +395,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever one of a guild's integration was updated.
 
-    Emits the guild id, if the guild was not cached.
+    Emits the guild id if the guild was not cached.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-integrations-update).
   """
@@ -426,8 +430,7 @@ defmodule Crux.Base.Consumer do
     This includes kicks and bans.
 
     Emits the user if the member was not cached.
-
-    The second element is the guild id, if the guild was not cached.
+    Emits the guild id if the guild was not cached.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-remove).
   """
@@ -451,8 +454,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a guild member was updated.
 
-    The first element is the member before the update or nil if uncached previously.
-    The second element is the member after the update.
+    Emits nil as the member before the updated if it was uncached.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-member-update).
   """
@@ -506,8 +508,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a role was updated.
 
-    The first element is the role before the update or nil if previously cached.
-    The second element is the role after the update.
+    Emits nil as the role before the update if it was uncached previously.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-role-update).
   """
@@ -529,7 +530,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a role was deleted.
 
-    If the role is not cached emits a tuple of the role id and if not cached the guild id, or guild.
+    Emits a tuple of role and guild or guild id if uncached.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-role-delete).
   """
@@ -613,7 +614,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a channel was deleted.
 
-    Emits as second element a tuple of channel and guild id if the channel was not cached.
+    Emits a tuple of channel and guild id if the channel was not cached.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-delete).
   """
@@ -637,7 +638,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a bulk of messages was deleted.
 
-    Emits the channel id if the channel was not cached.
+    Emits a tuple of channel and guild id if the channel was not cached.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk).
   """
@@ -662,20 +663,28 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a reaction was added to a message.
 
+    Emits the user id if the user was not cached.
+    Emits a tuple of channel and guild id if the channel was not cached.
+
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-reaction-add).
   """
   @type message_reaction_add_event ::
           {:MESSAGE_REACTION_ADD,
-           {User.t() | user_id(), Channel.t() | channel_id(), message_id(), Emoji.t()},
-           shard_id()}
+           {User.t() | user_id(), Channel.t() | {channel_id(), guild_id()}, message_id(),
+            Emoji.t()}, shard_id()}
 
   @typedoc """
     Emitted whenever a reaction was removed from a message.
 
+    Emits the user id if the user was not cached.
+    Emits a tuple of channel and guild id if the channel was not cached.
+
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove).
   """
   @type message_reaction_remove_event ::
-          {:MESSAGE_REACTION_REMOVE, {User.t(), Channel.t(), message_id(), Emoji.t()}, shard_id()}
+          {:MESSAGE_REACTION_REMOVE,
+           {User.t() | user_id(), Channel.t() | {channel_id(), guild_id() | nil}, message_id(),
+            Emoji.t()}, shard_id()}
 
   def handle_event(type, data, _shard_id)
       when type in [:MESSAGE_REACTION_ADD, :MESSAGE_REACTION_REMOVE] do
@@ -703,7 +712,7 @@ defmodule Crux.Base.Consumer do
           channel
 
         :error ->
-          data.channel_id
+          {data.channel_id, Map.get(data, :guild_id)}
       end
 
     {user, channel, data.message_id, emoji}
@@ -715,11 +724,11 @@ defmodule Crux.Base.Consumer do
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove-all).
   """
   @type message_reaction_remove_all_event ::
-          {:MESSAGE_REACTION_REMOVE_ALL, {message_id(), Channel.t() | channel_id()}}
+          {:MESSAGE_REACTION_REMOVE_ALL, {message_id(), Channel.t() | {channel_id(), guild_id()}}}
 
   def handle_event(
         :MESSAGE_REACTION_REMOVE_ALL,
-        %{channel_id: channel_id, message_id: message_id},
+        %{channel_id: channel_id, message_id: message_id} = data,
         _shard_id
       ) do
     case Cache.channel_cache().fetch(channel_id) do
@@ -727,7 +736,7 @@ defmodule Crux.Base.Consumer do
         {message_id, channel}
 
       :error ->
-        {message_id, channel_id}
+        {message_id, {channel_id, Map.get(data, :guild_id)}}
     end
   end
 
@@ -769,14 +778,15 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever a user started typing in a channel.
 
-    The first element is the channel id if the channel was not cached.
-    The second element is the user id if the user was not cached.
-    The third element is the timestamp of when the user started typing.
+    Emits a tuple of channel and guild id if the channel was not cached.
+    Emits the user id if the user was not cached.
+    The third element is the unix timestamp of when the user started typing.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#typing-start).
   """
   @type typing_start_event ::
-          {:TYPING_START, {Channel.t() | channel_id(), User.t() | user_id(), String.t()},
+          {:TYPING_START,
+           {Channel.t() | {channel_id(), guild_id() | nil}, User.t() | user_id(), String.t()},
            shard_id()}
 
   def handle_event(:TYPING_START, data, _shard_id) do
@@ -795,7 +805,7 @@ defmodule Crux.Base.Consumer do
           channel
 
         :error ->
-          data.channel_id
+          {data.channel_id, Map.get(data, :guild_id)}
       end
 
     {channel, user, data.timestamp}
@@ -804,8 +814,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever properties about the current user changed.
 
-    The first element is the user before the update or nil if previously cached.
-    The second element is the user after the update.
+    Emits nil as the user before the update if uncached previously.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#user-update).
   """
@@ -827,8 +836,7 @@ defmodule Crux.Base.Consumer do
   @typedoc """
     Emitted whenever the voice state of a member changed.
 
-    The first element is the voice state before the update or nil if previously cached.
-    The second element is the voice state after the update.
+    Emits nil as the voice state before the update if uncached previously.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#voice-state-update).
   """
@@ -908,7 +916,7 @@ defmodule Crux.Base.Consumer do
     {guild, channel}
   end
 
-  # User account only thing, for some reason bots do receive it, although empty, sometimes as well.
+  # User account only thing, for some reason bots do receive it sometimes as well, although always empty.
   def handle_event(:PRESENCES_REPLACE, [], _shard_id), do: nil
 
   def handle_event(type, data, shard_id) do
