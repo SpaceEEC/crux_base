@@ -838,6 +838,18 @@ defmodule Crux.Base.Consumer do
   def handle_event(:VOICE_STATE_UPDATE, %{user_id: user_id} = data, _shard_id) do
     voice_state = Structs.create(data, VoiceState)
 
+    case data do
+      %{member: member} when not is_nil(member) ->
+        member
+        |> Map.put(:guild_id, voice_state.guild_id)
+        |> Map.put(:user, %{id: voice_state.user_id})
+        |> Structs.create(Member)
+        |> Cache.guild_cache().insert()
+
+      _ ->
+        nil
+    end
+
     old_voice_state =
       case Cache.guild_cache().fetch(data.guild_id) do
         {:ok, %{voice_states: %{^user_id => voice_state}}} ->
