@@ -584,17 +584,15 @@ defmodule Crux.Base.Consumer do
            Message.t()
            | %{channel_id: channel_id(), id: message_id(), embeds: [term()]}, shard_id()}
 
-  def handle_event(:MESSAGE_UPDATE, data, _shard_id) do
-    case data do
-      %{author: _author} ->
-        Structs.create(data, Message)
+  def handle_event(:MESSAGE_UPDATE, %{author: _author} = data, _shard_id) do
+    Structs.create(data, Message)
+  end
 
-      # Embed update, only has channel_id, id, and embeds
-      _ ->
-        data
-        |> Map.update(:id, nil, &Util.id_to_int/1)
-        |> Map.update(:channel_id, nil, &Util.id_to_int/1)
-    end
+  # Embed update, only has channel_id, id, and embeds
+  def handle_event(:MESSAGE_UPDATE, data, _shard_id) do
+    data
+    |> Map.update!(:id, &Util.id_to_int/1)
+    |> Map.update!(:channel_id, &Util.id_to_int/1)
   end
 
   @typedoc """
