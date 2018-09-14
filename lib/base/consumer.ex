@@ -563,22 +563,34 @@ defmodule Crux.Base.Consumer do
 
     Enum.each(data.mentions, &Cache.user_cache().insert/1)
 
-    case Structs.create(data, Message) do
-      %{member: nil} = message ->
-        message
+    message = Structs.create(data, Message)
 
-      %{member: member} = message ->
-        Cache.guild_cache().insert(member)
+    Enum.each(
+      data.mentions,
+      fn
+        %{id: id, member: member} when not is_nil(member) ->
+          member
+          |> Map.put(:guild_id, message.guild_id)
+          |> Map.put(:user, %{id: id})
+          |> Structs.create(Member)
+          |> Cache.guild_cache().insert()
 
-        message
-    end
+        _ ->
+          nil
+      end
+    )
+
+    with %{member: member} when not is_nil(member) <- message,
+         do: Cache.guild_cache().insert(member)
+
+    message
   end
 
   @typedoc """
     Emitted whenever a message was updated.
 
     Emits a partial object for "embed update"s (discord auto embedding websites/images/videos)
-    Or a full message for "actual" message updates.
+    Or the full new message for "actual" message updates.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-update).
   """
