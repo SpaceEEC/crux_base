@@ -642,15 +642,20 @@ defmodule Crux.Base.Consumer do
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk).
   """
   @type message_delete_bulk_event ::
-          {:MESSAGE_DELETE_BULK, {[message_id()], Channel.t() | channel_id()}, shard_id()}
+          {:MESSAGE_DELETE_BULK, {[message_id()], Channel.t() | {channel_id(), guild_id()}},
+           shard_id()}
 
-  def handle_event(:MESSAGE_DELETE_BULK, %{ids: ids, channel_id: channel_id}, _shard_id) do
+  def handle_event(
+        :MESSAGE_DELETE_BULK,
+        %{ids: ids, channel_id: channel_id} = data,
+        _shard_id
+      ) do
     case Cache.channel_cache().fetch(channel_id) do
-      :error ->
-        {ids |> Enum.map(&Util.id_to_int/1), channel_id}
-
       {:ok, channel} ->
         {ids |> Enum.map(&Util.id_to_int/1), channel}
+
+      :error ->
+        {ids |> Enum.map(&Util.id_to_int/1), {channel_id, Map.get(data, :guild_id)}}
     end
   end
 
