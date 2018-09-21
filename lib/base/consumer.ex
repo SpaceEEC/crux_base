@@ -10,7 +10,19 @@ defmodule Crux.Base.Consumer do
   alias Crux.Cache
 
   alias Crux.Structs
-  alias Crux.Structs.{Channel, Emoji, Guild, Member, Message, Role, User, Util, VoiceState}
+
+  alias Crux.Structs.{
+    Channel,
+    Emoji,
+    Guild,
+    Member,
+    Message,
+    Presence,
+    Role,
+    User,
+    Util,
+    VoiceState
+  }
 
   @registry Crux.Base.Registry
 
@@ -741,15 +753,38 @@ defmodule Crux.Base.Consumer do
   end
 
   @typedoc """
-    Emitted whenever a user's presence updated.
+    Emitted whenever a user's presence or any of the user's properties updated.
+
+    Emits presences for presence updates.
+    Emits users for user updates.
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#presence-update).
   """
   @type presence_update_event ::
           {:PRESENCE_UPDATE, {Presence.t() | nil, Presence.t()}, shard_id()}
+          | {:PRESENCE_UPDATE, {User.t() | nil, User.t()}, shard_id()}
 
-  # TODO: This also propagates roles / username / etc changes. Would be nice to see the difference here in a sane manner.
-  def handle_event(:PRESENCE_UPDATE, data, _shard_id) do
+  def handle_event(:PRESENCE_UPDATE, data, shard_id) do
+    old_user =
+      data.user.id
+      |> Cache.user_cache().fetch()
+      |> case do
+        {:ok, user} ->
+          user
+
+        :error ->
+          nil
+      end
+
+    new_user =
+      data.user
+      |> Cache.user_cache().update()
+      |> Structs.create(User)
+
+    unless old_user == new_user do
+      Crux.Base.Producer.dispatch({:PRESENCE_UPDATE, {old_user, new_user}, shard_id})
+    end
+
     old_presence =
       case Cache.presence_cache().fetch(data.user.id) do
         {:ok, presence} ->
@@ -759,20 +794,13 @@ defmodule Crux.Base.Consumer do
           nil
       end
 
-    presence =
+    new_presence =
       data
       |> Map.put(:id, data.user.id)
       |> Cache.presence_cache().update()
+      |> Structs.create(Presence)
 
-    user =
-      Cache.user_cache().update(data.user)
-      |> Structs.create(User)
-
-    with %{roles: roles, guild_id: guild_id} <- data do
-      Cache.guild_cache().insert({guild_id, {user, roles}})
-    end
-
-    {old_presence, presence}
+    unless old_presence == new_presence, do: {old_presence, new_presence}
   end
 
   @typedoc """
