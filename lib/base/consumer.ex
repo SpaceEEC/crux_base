@@ -593,8 +593,13 @@ defmodule Crux.Base.Consumer do
       end
     )
 
-    with %{member: member} when not is_nil(member) <- message,
-         do: Cache.guild_cache().insert(member)
+    with %{member: member, guild_id: guild_id, author: author} when not is_nil(member) <- message do
+      member
+      |> Map.put(:guild_id, guild_id)
+      |> Map.put(:user, author)
+      |> Structs.create(Member)
+      |> Cache.guild_cache().insert()
+    end
 
     message
   end
