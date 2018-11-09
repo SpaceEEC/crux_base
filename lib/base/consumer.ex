@@ -40,7 +40,7 @@ defmodule Crux.Base.Consumer do
   @doc false
   def handle_events(events, _from, nil) do
     for {type, data, shard_id} <- events,
-        value <- [handle_event(type, data, shard_id)],
+        value <- handle_event(type, data, shard_id) |> List.wrap(),
         value != nil do
       Crux.Base.Producer.dispatch({type, value, shard_id})
     end
@@ -786,9 +786,10 @@ defmodule Crux.Base.Consumer do
       |> Cache.user_cache().update()
       |> Structs.create(User)
 
-    unless old_user == new_user do
-      Crux.Base.Producer.dispatch({:PRESENCE_UPDATE, {old_user, new_user}, shard_id})
-    end
+    ret =
+      unless old_user == new_user do
+        [{old_user, new_user}]
+      end
 
     old_presence =
       case Cache.presence_cache().fetch(data.user.id) do
@@ -805,7 +806,11 @@ defmodule Crux.Base.Consumer do
       |> Cache.presence_cache().update()
       |> Structs.create(Presence)
 
-    unless old_presence == new_presence, do: {old_presence, new_presence}
+    if old_presence == new_presence do
+      ret
+    else
+      [{old_presence, new_presence} | ret]
+    end
   end
 
   @typedoc """
