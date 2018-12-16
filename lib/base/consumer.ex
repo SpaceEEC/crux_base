@@ -769,7 +769,7 @@ defmodule Crux.Base.Consumer do
           {:PRESENCE_UPDATE, {Presence.t() | nil, Presence.t()}, shard_id()}
           | {:PRESENCE_UPDATE, {User.t() | nil, User.t()}, shard_id()}
 
-  def handle_event(:PRESENCE_UPDATE, data, shard_id) do
+  def handle_event(:PRESENCE_UPDATE, data, _shard_id) do
     old_user =
       data.user.id
       |> Cache.user_cache().fetch()
@@ -787,7 +787,9 @@ defmodule Crux.Base.Consumer do
       |> Structs.create(User)
 
     ret =
-      unless old_user == new_user do
+      if old_user == new_user do
+        []
+      else
         [{old_user, new_user}]
       end
 
