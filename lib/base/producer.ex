@@ -3,27 +3,15 @@ defmodule Crux.Base.Producer do
 
   use GenStage
 
-  @registry Crux.Base.Registry
-
   @doc false
-  def start_link(shard_id) do
-    name = {:via, Registry, {@registry, {:producer, shard_id}}}
-
-    GenStage.start_link(__MODULE__, nil, name: name)
+  def start_link(_shard_id) do
+    GenStage.start_link(__MODULE__, nil)
   end
 
   @doc false
-  def dispatch({_, nil, _nil}), do: nil
-
-  def dispatch({type, data, shard_id}) do
-    with [{pid, _other}] <- Registry.lookup(@registry, {:producer, shard_id}),
-         true <- Process.alive?(pid) do
-      GenStage.cast(pid, {:dispatch, {type, data, shard_id}})
-    else
-      _ ->
-        require Logger
-        Logger.warn("[Crux][Base][Producer]: Missing producer for shard #{shard_id}; #{type}")
-    end
+  def dispatch({type, data, shard_id, base}) do
+    pid = Crux.Base.producers(base) |> Map.fetch!(shard_id)
+    GenStage.cast(pid, {:dispatch, {type, data, shard_id}})
   end
 
   # Queue
@@ -35,9 +23,7 @@ defmodule Crux.Base.Producer do
 
   @doc false
   def init(_state) do
-    dispatcher = Application.fetch_env!(:crux_base, :dispatcher)
-
-    {:producer, {:queue.new(), 0}, dispatcher: dispatcher}
+    {:producer, {:queue.new(), 0}, dispatcher: GenStage.BroadcastDispatcher}
   end
 
   @doc false
