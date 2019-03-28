@@ -1,6 +1,6 @@
 defmodule Crux.Base.Processor do
   @moduledoc """
-    Module processing incoming events.
+    Module processing gateway packets into `t:event/0`s making necessary cache lookups / insertions.
   """
 
   use GenStage
@@ -112,6 +112,12 @@ defmodule Crux.Base.Processor do
              _trace: [String.t()]
            }, shard_id()}
 
+  @doc """
+    Processes the `type` (`t` value of a packet) along its `data` (`d` portion of a packet).
+    This will do necessary transformation, cache lookups, and cache insertions.
+
+    Returns an `t:event/0` or a list of them.
+  """
   @spec process_event(
           type :: atom(),
           data :: term(),
@@ -196,7 +202,7 @@ defmodule Crux.Base.Processor do
     cache_provider.channel_cache().delete(data.id)
 
     with %{guild_id: guild_id} when is_integer(guild_id) <- data,
-         do: cache_provider.guild_cache().delete(guild_id, channel)
+         do: cache_provider.guild_cache().delete(channel)
 
     channel
   end
@@ -309,7 +315,7 @@ defmodule Crux.Base.Processor do
     if guild.unavailable do
       cache_provider.guild_cache().update(guild)
     else
-      cache_provider.guild_cache().delete(guild.id, :remove)
+      cache_provider.guild_cache().delete(guild.id)
 
       guild
     end
@@ -449,7 +455,7 @@ defmodule Crux.Base.Processor do
       ) do
     case cache_provider.guild_cache().fetch(guild_id) do
       {:ok, %{members: %{^id => member}} = guild} ->
-        cache_provider.guild_cache().delete(guild_id, member)
+        cache_provider.guild_cache().delete(member)
         {member, guild}
 
       {:ok, guild} ->
@@ -559,7 +565,7 @@ defmodule Crux.Base.Processor do
       ) do
     case cache_provider.guild_cache().fetch(guild_id) do
       {:ok, %{roles: %{^role_id => role}}} ->
-        cache_provider.guild_cache().delete(guild_id, role)
+        cache_provider.guild_cache().delete(role)
         role
 
       {:ok, guild} ->
