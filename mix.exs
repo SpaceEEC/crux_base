@@ -35,7 +35,7 @@ defmodule Crux.Base.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger]
     ]
   end
 
@@ -45,7 +45,11 @@ defmodule Crux.Base.MixProject do
       {:crux_structs, git: "https://github.com/spaceeec/crux_structs.git", override: true},
       {:crux_cache, git: "https://github.com/spaceeec/crux_cache.git", override: true},
       {:crux_gateway, git: "https://github.com/spaceeec/crux_gateway.git", override: true},
-      {:ex_doc, git: "https://github.com/spaceeec/ex_doc", branch: "feat/umbrella", only: :dev, runtime: false}
+      {:ex_doc,
+       git: "https://github.com/spaceeec/ex_doc",
+       branch: "feat/umbrella",
+       only: :dev,
+       runtime: false}
     ]
   end
 end
