@@ -23,6 +23,7 @@ defmodule Crux.Base do
     start_link({options, []})
   end
 
+  @impl true
   def init(options) when is_list(options), do: options |> Map.new() |> init()
 
   def init(%{gateway: gateway, cache_provider: cache_provider}) do
@@ -38,9 +39,10 @@ defmodule Crux.Base do
           )
         ]
       end
-      |> Enum.flat_map(& &1)
 
-    Supervisor.init(children, strategy: :one_for_one)
+    children
+    |> Enum.flat_map(& &1)
+    |> Supervisor.init(strategy: :one_for_one)
   end
 
   @doc false

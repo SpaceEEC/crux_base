@@ -22,12 +22,14 @@ defmodule Crux.Base.ConsumerSupervisor do
   use Elixir.ConsumerSupervisor
 
   @doc false
+  @spec start_link({module(), GenServer.server()}) :: Supervisor.on_start()
   def start_link({mod, _base} = args) when is_atom(mod) do
     ConsumerSupervisor.start_link(__MODULE__, args)
   end
 
+  @impl true
   def init({children, base}) do
-    producers = Crux.Base.producers(base) |> Map.values()
+    producers = base |> Crux.Base.producers() |> Map.values()
     opts = [strategy: :one_for_one, subscribe_to: producers]
 
     ConsumerSupervisor.init([children], opts)

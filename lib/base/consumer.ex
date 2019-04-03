@@ -5,18 +5,21 @@ defmodule Crux.Base.Consumer do
     You can fetch said producers via `Crux.Base.producers/1`
   """
 
+  @behaviour GenStage
   use GenStage
 
   alias Crux.Gateway.Connection.Producer, as: GatewayProducer
 
-  alias Crux.Base.{Producer, Processor}
+  alias Crux.Base.{Processor, Producer}
 
   @doc false
+  @spec start_link(term()) :: GenServer.on_start()
   def start_link(arg) do
     GenStage.start_link(__MODULE__, arg)
   end
 
   @doc false
+  @impl true
   def init({shard_id, gateway, cache_provider, base}) do
     pid =
       gateway
@@ -27,9 +30,10 @@ defmodule Crux.Base.Consumer do
   end
 
   @doc false
+  @impl true
   def handle_events(events, _from, {base, cache_provider} = state) do
     for {type, data, shard_id} <- events,
-        value <- Processor.process_event(type, data, shard_id, cache_provider) |> List.wrap(),
+        value <- type |> Processor.process_event(data, shard_id, cache_provider) |> List.wrap(),
         value != nil do
       Producer.dispatch({type, value, shard_id, base})
     end

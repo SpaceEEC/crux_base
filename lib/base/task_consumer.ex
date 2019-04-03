@@ -22,10 +22,12 @@ defmodule Crux.Base.TaskConsumer do
     quote location: :keep do
       @behaviour Crux.Base.TaskConsumer
 
+      @spec start_link(Crux.Base.Processor.event()) :: {:ok, pid}
       def start_link(event) do
         Task.start_link(__MODULE__, :handle_event, [event])
       end
 
+      @spec child_spec(term()) :: Supervisor.child_spec()
       def child_spec(_args) do
         %{
           id: __MODULE__,

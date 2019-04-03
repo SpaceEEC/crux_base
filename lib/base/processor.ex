@@ -129,7 +129,8 @@ defmodule Crux.Base.Processor do
       data,
       :guilds,
       &Enum.map(&1, fn guild ->
-        Structs.create(guild, Guild)
+        guild
+        |> Structs.create(Guild)
         |> cache_provider.guild_cache().update()
       end)
     )
@@ -159,7 +160,8 @@ defmodule Crux.Base.Processor do
 
   def process_event(:CHANNEL_CREATE, data, _shard_id, cache_provider) do
     channel =
-      cache_provider.channel_cache().update(data)
+      data
+      |> cache_provider.channel_cache().update()
       |> Structs.create(Channel)
 
     with %{guild_id: guild_id} when is_integer(guild_id) <- channel,
@@ -255,38 +257,38 @@ defmodule Crux.Base.Processor do
       when guild_event in [:GUILD_CREATE, :GUILD_UPDATE] do
     guild = Structs.create(data, Guild)
 
-    if Map.has_key?(data, :members) do
-      Enum.each(data.members, fn member -> cache_provider.user_cache().insert(member.user) end)
-    end
+    data
+    |> Map.get(:members, [])
+    |> Enum.each(fn member -> cache_provider.user_cache().insert(member.user) end)
 
-    if Map.has_key?(data, :channels) do
-      Enum.each(data.channels, fn channel ->
-        channel
-        |> Map.put(:guild_id, data.id)
-        |> cache_provider.channel_cache().insert()
-      end)
-    end
+    data
+    |> Map.get(:channels, [])
+    |> Enum.each(fn channel ->
+      channel
+      |> Map.put(:guild_id, data.id)
+      |> cache_provider.channel_cache().insert()
+    end)
 
-    if Map.has_key?(data, :emojis) do
-      Enum.each(data.emojis, &cache_provider.emoji_cache().insert/1)
-    end
+    data
+    |> Map.get(:emojis, [])
+    |> Enum.each(&cache_provider.emoji_cache().insert/1)
 
-    if Map.has_key?(data, :presences) do
-      Enum.each(data.presences, fn presence ->
-        presence
-        |> Map.put(:id, presence.user.id)
-        |> cache_provider.presence_cache().insert()
-      end)
-    end
+    data
+    |> Map.get(:presences, [])
+    |> Enum.each(fn presence ->
+      presence
+      |> Map.put(:id, presence.user.id)
+      |> cache_provider.presence_cache().insert()
+    end)
 
-    case cache_provider.guild_cache().lookup(guild.id) do
-      {:ok, _pid} when guild_event == :GUILD_CREATE ->
+    case cache_provider.guild_cache().fetch(guild.id) do
+      {:ok, _guild} when guild_event == :GUILD_CREATE ->
         # Guild was already known, see :READY, not emitting guild create
         cache_provider.guild_cache().insert(guild)
 
         nil
 
-      {:ok, _pid} ->
+      {:ok, _guild} ->
         # must be GUILD_UPDATE
         {guild, cache_provider.guild_cache().update(guild)}
 
@@ -589,14 +591,12 @@ defmodule Crux.Base.Processor do
 
     Enum.each(data.mentions, &cache_provider.user_cache().insert/1)
 
-    message = Structs.create(data, Message)
-
     Enum.each(
       data.mentions,
       fn
         %{id: id, member: member} when not is_nil(member) ->
           member
-          |> Map.put(:guild_id, message.guild_id)
+          |> Map.put(:guild_id, data.guild_id)
           |> Map.put(:user, %{id: id})
           |> Structs.create(Member)
           |> cache_provider.guild_cache().insert()
@@ -606,12 +606,10 @@ defmodule Crux.Base.Processor do
       end
     )
 
-    with %{member: member, guild_id: guild_id, author: author} when not is_nil(member) <- message do
-      member
-      |> Map.put(:guild_id, guild_id)
-      |> Map.put(:user, author)
-      |> Structs.create(Member)
-      |> cache_provider.guild_cache().insert()
+    message = Structs.create(data, Message)
+
+    if message.member do
+      cache_provider.guild_cache().insert()
     end
 
     message
@@ -659,10 +657,10 @@ defmodule Crux.Base.Processor do
       ) do
     case cache_provider.channel_cache().fetch(channel_id) do
       {:ok, channel} ->
-        {message_id |> Util.id_to_int(), channel}
+        {Util.id_to_int(message_id), channel}
 
       :error ->
-        {message_id |> Util.id_to_int(), {channel_id, guild_id}}
+        {Util.id_to_int(message_id), {channel_id, guild_id}}
     end
   end
 
@@ -685,10 +683,10 @@ defmodule Crux.Base.Processor do
       ) do
     case cache_provider.channel_cache().fetch(channel_id) do
       {:ok, channel} ->
-        {ids |> Enum.map(&Util.id_to_int/1), channel}
+        {Enum.map(ids, &Util.id_to_int/1), channel}
 
       :error ->
-        {ids |> Enum.map(&Util.id_to_int/1), {channel_id, Map.get(data, :guild_id)}}
+        {Enum.map(ids, &Util.id_to_int/1), {channel_id, Map.get(data, :guild_id)}}
     end
   end
 
@@ -721,11 +719,11 @@ defmodule Crux.Base.Processor do
   def process_event(type, data, _shard_id, cache_provider)
       when type in [:MESSAGE_REACTION_ADD, :MESSAGE_REACTION_REMOVE] do
     emoji =
-      with id when not is_nil(id) <- data.emoji.id,
-           {:ok, emoji} <- cache_provider.emoji_cache().fetch(id) do
-        emoji
-      else
-        _ ->
+      case cache_provider.emoji_cache().fetch(data.emoji.id) do
+        {:ok, emoji} ->
+          emoji
+
+        :error ->
           Structs.create(data.emoji, Emoji)
       end
 
