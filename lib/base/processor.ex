@@ -609,7 +609,7 @@ defmodule Crux.Base.Processor do
     message = Structs.create(data, Message)
 
     if message.member do
-      cache_provider.guild_cache().insert()
+      cache_provider.guild_cache().insert(message.member)
     end
 
     message
