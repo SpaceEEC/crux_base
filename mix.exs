@@ -42,9 +42,9 @@ defmodule Crux.Base.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:crux_structs, git: "https://github.com/spaceeec/crux_structs.git", override: true},
-      {:crux_cache, git: "https://github.com/spaceeec/crux_cache.git", override: true},
-      {:crux_gateway, git: "https://github.com/spaceeec/crux_gateway.git", override: true},
+      {:crux_structs, "~> 0.2.0"},
+      {:crux_cache, "~> 0.2.0"},
+      {:crux_gateway, "~> 0.2.0"},
       {:ex_doc,
        git: "https://github.com/spaceeec/ex_doc",
        branch: "feat/umbrella",
