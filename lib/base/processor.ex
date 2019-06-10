@@ -109,7 +109,6 @@ defmodule Crux.Base.Processor do
              private_channels: [],
              guilds: [Guild.t()],
              session_id: String.t(),
-             _trace: [String.t()]
            }, shard_id()}
 
   @doc """
@@ -147,7 +146,7 @@ defmodule Crux.Base.Processor do
 
     For more information see [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#resumed).
   """
-  @type resumed_event :: {:RESUMED, %{_trace: [String.t()]}, shard_id()}
+  @type resumed_event :: {:RESUMED, map(), shard_id()}
 
   def process_event(:RESUMED, data, _shard_id, _cache_provider), do: data
 
