@@ -10,7 +10,7 @@ defmodule Crux.Base.ConsumerSupervisor do
     def init(_args) do
       children = [
         # other childrens...
-        {Crux.Base.ConsumerSupervisor, {Bot.Consumer, Bot.CruxBase}]
+        [{Crux.Base.ConsumerSupervisor, {Bot.Consumer, Bot.CruxBase}]
       ]
 
       Supervisor.init(children, strategy: :one_for_one)
