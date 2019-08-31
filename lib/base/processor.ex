@@ -108,7 +108,7 @@ defmodule Crux.Base.Processor do
              # always empty for bots
              private_channels: [],
              guilds: [Guild.t()],
-             session_id: String.t(),
+             session_id: String.t()
            }, shard_id()}
 
   @doc """
@@ -485,6 +485,11 @@ defmodule Crux.Base.Processor do
         {:ok, %{members: %{^id => old_member}}} ->
           old_member
 
+        # Uncached member
+        {:ok, _guild} ->
+          nil
+
+        # Uncached guild
         :error ->
           nil
       end
