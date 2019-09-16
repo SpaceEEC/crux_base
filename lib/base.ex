@@ -10,9 +10,16 @@ defmodule Crux.Base do
   @type options ::
           %{
             required(:gateway) => Crux.Gateway.gateway(),
-            required(:cache_provider) => module()
+            required(:cache_provider) => module(),
+            optional(:consumer) => module(),
+            optional(:producer) => module()
           }
-          | [{:gateway, Crux.Gateway.gateway()}]
+          | [
+              {:gateway, Crux.Gateway.gateway()}
+              | {:cache_provider, module()}
+              | {:consumer, module()}
+              | {:producer, module()}
+            ]
 
   @spec start_link(opts :: options() | {options(), GenServer.options()}) :: Supervisor.on_start()
   def start_link({options, gen_opts}) do
@@ -27,14 +34,24 @@ defmodule Crux.Base do
   def init(options) when is_list(options), do: options |> Map.new() |> init()
 
   def init(%{gateway: gateway, cache_provider: cache_provider}) do
+    consumer = Map.get(:consumer, Crux.Base.Consumers)
+    producer = Map.get(:consumer, Crux.Base.Producer)
+
+    consumer_opts = %{
+      gateway: gateway,
+      cache_provider: cache_provider,
+      base: self()
+      # shard_id
+    }
+
     children =
       for {shard_id, _producer} <- Producer.producers(gateway) do
         [
-          Supervisor.child_spec({Crux.Base.Consumer, {shard_id, gateway, cache_provider, self()}},
+          Supervisor.child_spec({consumer, %{consumer_opts | shard_id: shard_id}},
             id: {:consumer, shard_id}
           ),
           Supervisor.child_spec(
-            {Crux.Base.Producer, shard_id},
+            {producer, shard_id},
             id: {:producer, shard_id}
           )
         ]

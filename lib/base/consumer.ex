@@ -20,7 +20,7 @@ defmodule Crux.Base.Consumer do
 
   @doc false
   @impl true
-  def init({shard_id, gateway, cache_provider, base}) do
+  def init(%{shard_id: shard_id, gateway: gateway, cache_provider: cache_provider, base: base}) do
     pid =
       gateway
       |> GatewayProducer.producers()
