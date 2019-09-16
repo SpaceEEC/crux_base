@@ -40,7 +40,7 @@ defmodule Crux.Base do
     consumer_opts = %{
       gateway: gateway,
       cache_provider: cache_provider,
-      base: self()
+      base: self(),
       shard_id: nil
     }
 
