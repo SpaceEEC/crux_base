@@ -15,8 +15,8 @@ defmodule Crux.Base.Processor do
     Message,
     Presence,
     Role,
+    Snowflake,
     User,
-    Util,
     VoiceState
   }
 
@@ -639,8 +639,8 @@ defmodule Crux.Base.Processor do
   # Embed update, only has channel_id, id, and embeds
   def process_event(:MESSAGE_UPDATE, data, _shard_id, _cache_provider) do
     data
-    |> Map.update!(:id, &Util.id_to_int/1)
-    |> Map.update!(:channel_id, &Util.id_to_int/1)
+    |> Map.update!(:id, &Snowflake.to_snowflake/1)
+    |> Map.update!(:channel_id, &Snowflake.to_snowflake/1)
   end
 
   @typedoc """
@@ -661,10 +661,10 @@ defmodule Crux.Base.Processor do
       ) do
     case cache_provider.channel_cache().fetch(channel_id) do
       {:ok, channel} ->
-        {Util.id_to_int(message_id), channel}
+        {Snowflake.to_snowflake(message_id), channel}
 
       :error ->
-        {Util.id_to_int(message_id), {channel_id, guild_id}}
+        {Snowflake.to_snowflake(message_id), {channel_id, guild_id}}
     end
   end
 
@@ -687,10 +687,10 @@ defmodule Crux.Base.Processor do
       ) do
     case cache_provider.channel_cache().fetch(channel_id) do
       {:ok, channel} ->
-        {Enum.map(ids, &Util.id_to_int/1), channel}
+        {Enum.map(ids, &Snowflake.to_snowflake/1), channel}
 
       :error ->
-        {Enum.map(ids, &Util.id_to_int/1), {channel_id, Map.get(data, :guild_id)}}
+        {Enum.map(ids, &Snowflake.to_snowflake/1), {channel_id, Map.get(data, :guild_id)}}
     end
   end
 
