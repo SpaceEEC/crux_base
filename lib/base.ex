@@ -41,7 +41,7 @@ defmodule Crux.Base do
       gateway: gateway,
       cache_provider: cache_provider,
       base: self()
-      # shard_id
+      shard_id: nil
     }
 
     children =
