@@ -34,7 +34,7 @@ defmodule Crux.Base do
   def init(options) when is_list(options), do: options |> Map.new() |> init()
 
   def init(%{gateway: gateway, cache_provider: cache_provider} = opts) do
-    consumer = Map.get(opts, :consumer, Crux.Base.Consumers)
+    consumer = Map.get(opts, :consumer, Crux.Base.Consumer)
     producer = Map.get(opts, :producer, Crux.Base.Producer)
 
     consumer_opts = %{
