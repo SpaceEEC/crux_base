@@ -24,7 +24,7 @@ defmodule Crux.Base.ConsumerSupervisor do
   @doc false
   @spec start_link({module(), GenServer.server()}) :: Supervisor.on_start()
   def start_link({mod, _base} = args) when is_atom(mod) do
-    ConsumerSupervisor.start_link(__MODULE__, args)
+    ConsumerSupervisor.start_link(__MODULE__, args, [])
   end
 
   @impl true
