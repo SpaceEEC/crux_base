@@ -502,12 +502,39 @@ defmodule Crux.Base.Processor do
 
     For more information see `Crux.Gateway.Command.request_guild_members/2` and [Discord Docs](https://discordapp.com/developers/docs/topics/gateway#guild-members-chunk).
   """
-  @type guild_members_chunk_event :: {:GUILD_MEMBERS_CHUNK, [Member.t()], shard_id()}
+  @type guild_members_chunk_event ::
+          {:GUILD_MEMBERS_CHUNK,
+           %{
+             members: [Member.t()],
+             presences: [Presence.t()],
+             not_found: [Crux.Structs.Snowflake.t()]
+           }, shard_id()}
 
   def process_event(:GUILD_MEMBERS_CHUNK, data, _shard_id, cache_provider) do
-    members = Structs.create(data.members, Member)
+    members =
+      cache_provider.guild_cache().update(
+        {data.guild_id, {:members, Structs.create(data.members, Member)}}
+      )
 
-    cache_provider.guild_cache().update({data.guild_id, {:members, members}})
+    presences =
+      case data do
+        %{presences: presences} when is_list(presences) ->
+          Enum.map(data.presences, &cache_provider.presence_cache().update/1)
+
+        _ ->
+          nil
+      end
+
+    not_found =
+      case data do
+        %{not_found: not_found} when is_list(not_found) ->
+          Enum.map(data.not_found, &Snowflake.to_snowflake/1)
+
+        _ ->
+          nil
+      end
+
+    %{members: members, presences: presences, not_found: not_found}
   end
 
   @typedoc """
