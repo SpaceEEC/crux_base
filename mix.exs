@@ -42,15 +42,15 @@ defmodule Crux.Base.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:crux_structs, "~> 0.2.0"},
-      {:crux_cache, "~> 0.2.0"},
-      {:crux_gateway, "~> 0.2.0"},
+      {:crux_structs, "~> 0.2"},
+      {:crux_cache, "~> 0.2"},
+      {:crux_gateway, "~> 0.2"},
       {:ex_doc,
        git: "https://github.com/spaceeec/ex_doc",
        branch: "feat/umbrella",
        only: :dev,
        runtime: false},
-      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.1", only: [:dev, :test], runtime: false}
     ]
   end
 end
